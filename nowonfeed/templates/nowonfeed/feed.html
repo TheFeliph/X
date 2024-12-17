@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NowOn</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'feed/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'feed/css/feed.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+</head>
+<body>
+    <div class="feed-container">
+        <div class="sidebar">
+            <div class="profile-section">
+                <img src="https://via.placeholder.com/200" alt="Foto do perfil" class="profile-pic">
+                <p class="username">{{ user.username }}</p>
+            </div>
+        
+            <h2>MENU</h2>
+            <a href="#"><i class="bi bi-house"></i> Início</a>
+            <a href="#"><i class="bi bi-person"></i> Perfil</a>
+            <a href="#"><i class="bi bi-envelope"></i> Mensagens</a>
+            <a href="#"><i class="bi bi-gear"></i> Configurações</a>
+            <a href="{% url 'logout' %}"><i class="bi bi-door-closed"></i> Sair</a>
+        </div>
+
+        <div class="feed-content">
+            <h1>Bem-vindo ao NowOn</h1>
+            
+            <div class="tweet-box">
+                <form method="post" action="{% url 'nowonfeed' %}">
+                    {% csrf_token %}
+                    <textarea name="content" placeholder="O que está acontecendo?" required></textarea>
+                    <button type="submit">Tweetar</button>
+                </form>
+            </div>            
+
+            <div>
+                <h2>Feed</h2>
+                {% for tweet in posts %}
+                    <div class="tweet">
+                        <div class="tweet-content">
+                            <div class="tweet-header">
+                                <strong>{{ user.username }}</strong>
+                            </div>
+                            <p>{{ tweet }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'feed/js/script.js' %}"></script>
+</body>
+</html>
