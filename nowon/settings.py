@@ -24,12 +24,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-#cm8^!rb3vgrqcw!q5d565^g(9@34yq_ccoxdv7p1i6sr*7)av'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG =True
 
 ALLOWED_HOSTS = [
-    'feliphfl.pythonanywhere.com',
-    'feliph2004.pythonanywhere.com',
-    'thefeliph.pythonanywhere.com',
+    'https://feliphfl.pythonanywhere.com',
     'thefeliph.herokuapp.com',
     '127.0.0.1',
 ]
@@ -94,6 +92,9 @@ DATABASES = {
         "PASSWORD": os.environ.get("SQL_PASSWORD", "password"),
         "HOST": os.environ.get("SQL_HOST", "localhost"),
         "PORT": os.environ.get("SQL_PORT", "5432"),
+
+            'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
