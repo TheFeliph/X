@@ -32,6 +32,9 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
 ]
 
+# Adicione o endereço do PythonAnywhere no final do arquivo ou onde for mais adequado
+PYTHONANYWHERE_URL = "feliphfl.pythonanywhere.com"
+
 
 
 
