@@ -89,3 +89,67 @@ def update(request):
         return HttpResponse("Updated code on PythonAnywhere")
     else:
         return HttpResponse("Couldn't update the code on PythonAnywhere")
+
+
+
+
+
+
+
+
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Post, Like
+
+@login_required
+def like_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    like, created = Like.objects.get_or_create(user=request.user, post=post)
+    if not created:
+        like.delete()
+    return redirect('post_detail', post_id=post.id)
+
+
+from django.shortcuts import render, get_object_or_404
+from .models import Post  # Substitua `Post` pelo modelo correto do seu projeto
+
+def post_detail(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    return render(request, 'post_detail.html', {'post': post})
+
+
+
+
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from .models import Post, Like
+
+def toggle_like(request, post_id):
+    if request.method == "POST":
+        post = get_object_or_404(Post, id=post_id)
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
+
+        if not created:
+            like.delete()
+            return JsonResponse({'status': 'unliked', 'likes_count': post.likes.count()})
+        return JsonResponse({'status': 'liked', 'likes_count': post.likes.count()})
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+
+
+
+
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from .models import Post
+
+def like_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    if request.user in post.likes.all():
+        post.likes.remove(request.user)
+        liked = False
+    else:
+        post.likes.add(request.user)
+        liked = True
+    return JsonResponse({'liked': liked, 'likes_count': post.likes.count()})
+

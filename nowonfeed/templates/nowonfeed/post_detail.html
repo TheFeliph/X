@@ -1,0 +1,23 @@
+<button id="like-btn" data-post-id="{{ post.id }}">
+    Curtir (<span id="like-count">{{ post.likes.count }}</span>)
+</button>
+
+<script>
+    document.getElementById('like-btn').addEventListener('click', function () {
+        const postId = this.getAttribute('data-post-id');
+        fetch(`/like/${postId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'liked') {
+                this.textContent = `Descurtir (${data.likes_count})`;
+            } else {
+                this.textContent = `Curtir (${data.likes_count})`;
+            }
+        });
+    });
+</script>

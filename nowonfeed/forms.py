@@ -40,4 +40,27 @@ class CustomUserCreationForm(UserCreationForm):
         username = self.cleaned_data.get('username')
         if len(username) > 150:
             raise forms.ValidationError("O nome de usuário deve ter no máximo 150 caracteres.")
-        return username
+        return username    
+    
+
+
+
+
+
+
+    from django import forms
+from .models import Like
+
+class LikeForm(forms.ModelForm):
+    class Meta:
+        model = Like
+        fields = []
+
+
+from .models import Comment
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['content']
+

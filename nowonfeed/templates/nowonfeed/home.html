@@ -1,0 +1,10 @@
+<h1>Posts</h1>
+<ul>
+  {% for post in posts %}
+    <li>
+      {{ post.content }} - {{ post.author.username }}
+      <a href="{% url 'like_post' post.id %}">Like</a> ({{ post.likes.count }})
+      <a href="{% url 'post_detail' post.id %}">Comments</a>
+    </li>
+  {% endfor %}
+</ul>
