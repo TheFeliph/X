@@ -29,18 +29,25 @@
         </div>
 
         <div class="feed-content">
-            <h1>Bem-vindo ao X</h1>
+            <div id="tweet-{{ tweet.id }}" class="tweet">
+                <div class="tweet-content">
+                    <div class="tweet-header">
+                        <strong>{{ user.username }}</strong>
+                    </div>
+                    <p>{{ main_post.post }}</p>
+                </div>
+            </div>
 
             <div class="tweet-box">
-                <form method="post" action="{% url 'nowonfeed' %}">
+                <div>
                     {% csrf_token %}
-                    <textarea name="content" placeholder="O que está acontecendo?" required></textarea>
-                    <button type="submit">Tweetar</button>
-                </form>
+                    <textarea name="content" placeholder="Faça seu comentario" required></textarea>
+                    <button type="button" onclick="tweetar('{{ main_post.id }}')">Tweetar</button>
+
+                </div>
             </div>
 
             <div>
-                <h2>Feed</h2>
                 {% for tweet in posts %}
                 <div id="tweet-{{ tweet.id }}" class="tweet">
                     <div class="tweet-content">
@@ -56,8 +63,7 @@
                 heart bi bi-suit-heart
             {% endif %}
         "></i>
-                            <i id="chat" onclick="redirectToComentaries('{{ tweet.id }}')"
-                                class="like-icon bi bi-chat"></i>
+                            <i id="chat" onclick="redirectToComentaries('{{ tweet.id }}')" class="like-icon bi bi-chat"></i>
                         </div>
                     </div>
                 </div>
@@ -66,7 +72,6 @@
         </div>
     </div>
 
-    <script src="{% static 'feed/js/script.js' %}"></script>
     <script src="{% static 'feed/js/global.js' %}"></script>
 </body>
 

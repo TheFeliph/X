@@ -8,6 +8,8 @@ from django.http import HttpResponse
 from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
 import git
+import random
+import string
 
 
 from .forms import CustomUserCreationForm  
@@ -56,25 +58,107 @@ def nowonfeed_view(request):
         return redirect('login')
     
     form = PostForm()
-    posts = request.session.get('posts', [])
+    allPosts = request.session.get('posts', [])
+    primarysPosts = [post for post in allPosts if post.get("isPrimary")] 
+    post_id_counter = request.session.get('post_id_counter', 1)
 
     if request.method == 'POST':
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             content = request.POST.get('content')
             if content:
-                posts.insert(0, content)
-                request.session['posts'] = posts
-                return JsonResponse({'new_post': content, 'username': request.user.username})
+                # Gerar ID de 5 dígitos usando o contador
+                post_id = str(post_id_counter).zfill(5)  # Preenche com zeros à esquerda até ter 5 caracteres
+
+                post_object = {"id": post_id, "post": content, "isLiked": False, "isPrimary": True}
+                allPosts.insert(0, post_object)
+                request.session['posts'] = allPosts
+                request.session['post_id_counter'] = post_id_counter + 1  # Incrementa o contador para o próximo ID
+                return JsonResponse({'new_post': post_object, 'username': request.user.username})
             else:
                 return JsonResponse({'error': 'Invalid content'}, status=400)
 
         form = PostForm(request.POST)
         if form.is_valid():
             new_post = form.cleaned_data['content']
-            posts.insert(0, new_post)
-            request.session['posts'] = posts
 
-    return render(request, 'nowonfeed/feed.html', {'form': form, 'posts': posts})
+            # Gerar ID de 5 dígitos usando o contador
+            post_id = str(post_id_counter).zfill(5)  # Preenche com zeros à esquerda até ter 5 caracteres
+
+            post_object = {"id": post_id, "post": new_post, "isLiked": False, "isPrimary": True}
+            primarysPosts.insert(0, post_object)
+            request.session['posts'] = primarysPosts
+            request.session['post_id_counter'] = post_id_counter + 1  # Incrementa o contador para o próximo ID
+
+    return render(request, 'nowonfeed/feed.html', {'form': form, 'posts': primarysPosts})
+
+def comentaries_view(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    param_value = request.GET.get('param', None)  # 'param' é o nome do parâmetro na URL
+    allPosts = request.session.get('posts', [])
+    main_post = next((post for post in allPosts if post.get("id") == param_value), None)
+    filtered_posts = [post for post in allPosts if post['id'][-5:] == param_value[:5] and not post['isPrimary']]
+    # post_id_counter = request.session.get('post_id_counter', 1)
+    
+    return render(request, 'nowonfeed/comentaries.html', {'param_value': param_value, 'main_post': main_post, 'posts': filtered_posts})
+
+
+@csrf_exempt
+def toggle_like_view(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    tweet_id = request.GET.get('id')
+
+    posts = request.session.get('posts', [])
+
+    for post in posts:
+        if post.get('id') == tweet_id:  
+            post['isLiked'] = not post['isLiked']  
+            break
+    else:
+        return JsonResponse({'error': 'Tweet não encontrado'}, status=404)
+
+    request.session['posts'] = posts
+
+    tweet = next(post for post in posts if post['id'] == tweet_id)
+    return JsonResponse({
+        'success': True,
+        'id': tweet_id,
+        'isLiked': tweet['isLiked']  
+    })
+    
+
+@csrf_exempt
+def comentary(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    form = PostForm()
+
+    tweet_id = request.GET.get('id')
+
+    posts = request.session.get('posts', [])
+    post_id_counter = request.session.get('post_id_counter', 1)
+
+
+    new_post = request.POST.get('content')
+
+    # Gerar 5 caracteres aleatórios (letras e números)
+    random_suffix = ''.join(random.choices(string.ascii_letters + string.digits, k=5))
+    first_five_chars = tweet_id[:5]
+
+    
+    # Concatenar com o tweet_id
+    post_id = f"{random_suffix}{first_five_chars}"
+
+    post_object = {"id": post_id, "post": new_post, "isLiked": False, "isPrimary": False}
+    posts.insert(0, post_object)
+    request.session['posts'] = posts
+    request.session['post_id_counter'] = post_id_counter + 1
+
+    return JsonResponse({'param_value': tweet_id})
 
 def logout_view(request):
     logout(request)
